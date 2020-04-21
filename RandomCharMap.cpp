@@ -1,9 +1,10 @@
 ﻿#include <iostream>
 #include <ctime>
 #include <cstdlib>
+#include <cmath>
 
 const char chars[4] = { ' ', '~', '|', '^' };
-const int Y = 29;
+const int Y = 30;
 const int X = 120;
 
 int mapBase[Y][X] = { 0 }; //yx
@@ -21,6 +22,10 @@ void genLakes(int radius, int n)
 			{
 				for (int j = x - radius; j <= x + radius; j++)
 				{
+					if (rand() % 5 == 0 && (j == x + radius || i == y + radius || i == y - radius))
+					{
+						break;
+					}
 					mapBase[i][j] = 1;
 				}
 			}
@@ -32,15 +37,39 @@ void genLakes(int radius, int n)
 void genMountains(int n)
 {
 	int x, y;
-	while(n != 0)
+	while (n != 0)
 	{
-		
-		x = rand() % X;
-		y = rand() % Y;
-		if (mapBase[y][x] == 0 || mapBase[y][x] == 2) {
-			mapBase[y][x] = 3;
-			n--;
+		x = abs(rand() % X - 1);
+		y = abs(rand() % Y - 1);
+		if (mapBase[y - 1][x] != 1 && mapBase[y + 1][x] != 1 && mapBase[y][x - 1] != 1 && mapBase[y][x + 1] != 1 && (mapBase[y][x] == 0 || mapBase[y][x] == 2))
+		{
+				mapBase[y][x] = 3;
+				n--;
 		}
+
+	}
+}
+
+void genTreeClusters(int n)
+{
+	int x, y;
+	while (n != 0)
+	{
+		x = abs(rand() % X - 1);
+		y = abs(rand() % Y - 1);
+		if (mapBase[y - 1][x] != 1 && mapBase[y + 1][x] != 1 && mapBase[y][x - 1] != 1 && mapBase[y][x + 1] != 1 && mapBase[y][x] == 0)
+		{
+			mapBase[y][x] = 2;
+			for (int i = 0; i < 2; i++)
+			{
+				mapBase[abs((y + (rand() % 2)) % Y)][(abs(x + (rand() % 2)) % X)] = 2;
+				mapBase[abs((y - (rand() % 2)) % Y)][(abs(x + (rand() % 2)) % X)] = 2;
+				mapBase[abs((y + (rand() % 2)) % Y)][(abs(x - (rand() % 2)) % X)] = 2;
+				mapBase[abs((y - (rand() % 2)) % Y)][(abs(x - (rand() % 2)) % X)] = 2;
+			}
+				n--;	
+		}
+
 	}
 }
 
@@ -58,10 +87,10 @@ void convertBaseToMap()
 int main()
 {
 	srand(time(NULL));
-	genLakes(2, 3);
-	genMountains(5);
+	genLakes(2, 6);
+	genMountains(30);
+	genTreeClusters(40);
 	convertBaseToMap();
-	int randNum;
 	for (int i = 0; i < Y; i++)
 	{
 		for (int j = 0; j < X; j++)
